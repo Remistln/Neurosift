@@ -16,17 +16,23 @@ class DicomProcessor:
         os.makedirs(self.processed_dir, exist_ok=True)
         self.store = MetadataStore()
 
-    def apply_window(self, image, center, width):
-        lower = center - (width / 2)
-        upper = center + (width / 2)
+    def apply_window(self, image, center=None, width=None):
+        # MRI robust normalization (Percentile scaling)
+        # Ignore zeros (background) for calculation
+        if np.max(image) == 0:
+            return image.astype(np.uint8)
+            
+        p1 = np.percentile(image[image > 0], 1)
+        p99 = np.percentile(image[image > 0], 99)
         
         # Clip
-        image = np.clip(image, lower, upper)
+        image = np.clip(image, p1, p99)
         
-        # Normalize
-        image = image - lower
-        image = image / width
+        # Min-Max Scaling to 0-255
+        image = image - p1
+        image = image / (p99 - p1 + 1e-8) # Avoid div/0
         image = (image * 255).astype(np.uint8)
+        
         return image
 
     def read_dicom(self, path):
