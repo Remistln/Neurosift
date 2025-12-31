@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+.dvc/
+data/raw/dicom/
+data/raw/processed/
+models/
+.env
+# Keep basic data config but exclude heavy files if needed
+# Actually we might need models if we don't mount volume
+# For now let's copy models if they exist, or rely on volume

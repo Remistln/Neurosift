@@ -1,0 +1,38 @@
+# Core Scientific Stack
+numpy
+pandas
+matplotlib
+opencv-python-headless
+scikit-learn
+
+# Deep Learning
+torch
+torchvision
+
+# Medical Imaging (NEW)
+pydicom
+tcia-utils
+pylibjpeg
+pylibjpeg-libjpeg
+pylibjpeg-openjpeg
+gdcm # often needed for compressed dicoms, might require conda/system install
+
+# Data Engineering
+requests
+boto3
+psycopg2-binary
+sqlalchemy
+dvc
+
+# MLOps
+mlflow
+
+# Application & API
+fastapi
+uvicorn
+python-multipart
+streamlit
+
+# Utils
+python-dotenv
+tqdm

@@ -1,0 +1,17 @@
+HELP FOR downloadSeries:
+Help on function downloadSeries in module tcia_utils.nbia:
+
+downloadSeries(series_data: Union[str, pandas.core.frame.DataFrame, List[str]], number: int = 0, path: str = 'tciaDownload', hash: str = '', api_url: str = '', input_type: str = '', format: str = '', csv_filename: str = '', as_zip: bool = False, max_workers: int = 10) -> Optional[pandas.core.frame.DataFrame]
+    Ingests a set of seriesUids and downloads them.
+    By default, series_data expects JSON containing "SeriesInstanceUID" elements.
+    Set number = n to download the first n series if you don't want the full dataset.
+    Set hash = "y" if you'd like to retrieve MD5 hash values for each image.
+    Saves to tciaDownload folder in current directory if no path is specified.
+    Set input_type = "list" to pass a list of Series UIDs instead of JSON.
+    Set input_type = "df" to pass a dataframe that contains a "SeriesInstanceUID" column.
+    Set input_type = "manifest" to pass the path of a *.TCIA manifest file as series_data.
+    Format can be set to "df" or "csv" to return series metadata. The metadata
+      includes info about series that have previously been downloaded if they're part of series_data.
+    Setting a csv_filename will create the csv even if format isn't specified.
+    If `as_zip` is set to True, it skips the unzipping steps.
+

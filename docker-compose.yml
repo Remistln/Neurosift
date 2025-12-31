@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Object Storage (S3-compatible) - Stores the MRI Images
+  minio:
+    image: minio/minio
+    container_name: neurosift-minio
+    ports:
+      - "9000:9000" # API Port
+      - "9001:9001" # Console Port
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  # Metadata Database - Stores info about papers, authors, image captions
+  postgres:
+    image: postgres:15
+    container_name: neurosift-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: neurosift
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Experiment Tracking - Tracks model metrics, params, and artifacts
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.9.2
+    container_name: neurosift-mlflow
+    ports:
+      - "5000:5000"
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql://user:password@postgres:5432/neurosift
+      MLFLOW_ARTIFACT_ROOT: s3://mlflow/
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+    depends_on:
+      - postgres
+      - minio
+    command: >
+      mlflow server --backend-store-uri postgresql://user:password@postgres:5432/neurosift --host 0.0.0.0 --serve-artifacts --artifacts-destination s3://mlflow/
+
+  # Main Application
+  app:
+    build: .
+    container_name: neurosift-app
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    environment:
+      - USE_LOCAL_STORAGE=True
+      # If switching to Docker network, DB_HOST should be 'postgres' (service name)
+      - DB_HOST=postgres
+      - DB_USER=user
+      - DB_PASS=password
+      - MINIO_ENDPOINT=minio:9000
+    depends_on:
+      - postgres
+      - minio
+
+volumes:
+  minio_data:
+  postgres_data:
